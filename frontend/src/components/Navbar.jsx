@@ -1,6 +1,7 @@
 import { UserIcon } from "@heroicons/react/24/solid";
 import logo from "../assets/logo.png"; // Adjust path based on your folder structure
 import { Link } from "react-router-dom";
+import { ShoppingCart, Star } from "lucide-react"; // <-- Add Star icon
 
 export default function Navbar() {
   return (
@@ -20,13 +21,30 @@ export default function Navbar() {
         <li><Link to="/visit-us">VISIT US</Link></li>
         </ul>
         <div className="flex items-center gap-4">
-        <Link
+          {/* Review Icon (left of profile) */}
+          <Link
+            to="/testimonial"
+            className="text-white p-2 rounded-full hover:bg-white hover:text-[#ca3d2a] transition duration-300 inline-flex items-center justify-center"
+            aria-label="Reviews"
+          >
+            <Star className="w-6 h-6" />
+          </Link>
+          {/* Profile Icon */}
+          <Link
             to="/login"
             className="text-white p-2 rounded-full hover:bg-white hover:text-[#ca3d2a] transition duration-300 inline-flex items-center justify-center"
             aria-label="Login"
             >
             <UserIcon className="w-6 h-6" />
             </Link>
+          {/* Cart Icon (right of profile) */}
+          <Link
+            to="/addtocart"
+            className="text-white p-2 rounded-full hover:bg-white hover:text-[#ca3d2a] transition duration-300 inline-flex items-center justify-center"
+            aria-label="Cart"
+          >
+            <ShoppingCart className="w-6 h-6" />
+          </Link>
         </div>
       </nav>
     </div>

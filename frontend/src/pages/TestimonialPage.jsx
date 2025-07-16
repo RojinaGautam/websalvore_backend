@@ -6,26 +6,26 @@ const TestimonialPage = () => {
   const [testimonials, setTestimonials] = useState([
     {
       id: 1,
-      name: "Sarah Johnson",
+      name: "Daniel Gallego",
       rating: 5,
-      review: "The lobster was absolutely divine! Fresh, perfectly cooked, and the staff was incredibly attentive. This place has become our go-to for special occasions.",
-      date: "2024-07-10",
-      dish: "Grilled Lobster"
+      review: "“The seafood platter was absolutely amazing—fresh, flavorful, and beautifully served. A must-try!",
+      date: "2024-10-30",
+      dish: "Grilled seafood platter"
     },
     {
       id: 2,
-      name: "Michael Chen",
+      name: "Olivia Wilson",
       rating: 5,
-      review: "Best seafood in town! The fish tacos were crispy and flavorful, and the ocean view made the experience even better. Highly recommend!",
-      date: "2024-07-08",
-      dish: "Fish Tacos"
+      review: "“I come here often because the food is consistently great and the atmosphere is so welcoming.”",
+      date: "2024-12-08",
+      dish: "Barbecue Grilled Octopus with Oregano"
     },
     {
       id: 3,
       name: "Emma Rodriguez",
       rating: 4,
       review: "Great atmosphere and fresh seafood. The clam chowder was rich and creamy. Service was prompt and friendly. Will definitely return!",
-      date: "2024-07-05",
+      date: "2024-07-20",
       dish: "Clam Chowder"
     }
   ]);

@@ -9,6 +9,9 @@ import MenuPage from "./pages/MenuPage";
 import VisitusPage from "./pages/VisitusPage";
 import AdminDashboard from "../Admin/AdminDashboard";
 import TestimonialPage from "./pages/TestimonialPage";
+import AddtocartPagePage from "./pages/AddtocartPage";
+
+
 
 function App() {
   return (
@@ -27,6 +30,7 @@ function App() {
                 <Route path="/menu" element={<MenuPage />} />
                 <Route path="/visit-us" element={<VisitusPage />} />
                 <Route path="/testimonial" element={<TestimonialPage />} />
+                <Route path="/addtocart" element={<AddtocartPagePage />} />
                 {/* Add more public routes here as needed */}
               </Routes>
             </Layout>
