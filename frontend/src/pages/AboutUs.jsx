@@ -1,0 +1,74 @@
+import React from "react";
+import aboutseabig from "../assets/aboutseabig.png";
+import aboutsea from "../assets/aboutsea.png";
+import aboutgirl from "../assets/aboutgirl.png";
+import backgroundImg from "../assets/background.jpg"; 
+
+const AboutUs = () => {
+  return (
+    <main className="relative min-h-screen text-white overflow-hidden">
+      {/* Background Image */}
+      <img
+        src={backgroundImg}
+        alt="Background"
+        className="absolute inset-0 w-full h-full object-cover blur-md z-0"
+        style={{ filter: 'blur(4px)' }}
+      />
+      <div className="absolute inset-0 bg-black/70 z-0" />
+      {/* Top Section */}
+      <section className="flex flex-col md:flex-row p-8 gap-8 relative z-10">
+        {/* Left Image */}
+        <div className="md:w-1/2">
+          <img
+            src={aboutseabig}
+            alt="Seafood table"
+            className="rounded-lg shadow-lg w-full object-cover h-[32rem] max-h-[90vh]"
+          />
+        </div>
+
+        {/* Right Text and Stacked Images */}
+        <div className="md:w-1/2 flex flex-col justify-center">
+          <h2 className="text-yellow-400 text-2xl md:text-3xl font-bold mb-4">
+            Welcome to Salvore Restaurant — Savor the Sea.
+          </h2>
+          <p className="text-gray-200 mb-4">
+            At Salvore, we bring the ocean's finest treasures to your table with
+            passion, precision, and a touch of modern elegance. Inspired by the
+            sea and crafted for the senses, our seafood-driven menu blends
+            global flavors with locally sourced ingredients, delivering
+            freshness in every bite.
+          </p>
+          <p className="text-gray-200 mb-4">
+            Whether you're savoring our signature grilled fish, indulging in
+            buttery lobster, or discovering new favorites from the deep, every
+            dish is a tribute to the ocean’s bounty.
+          </p>
+          <p className="text-yellow-300 font-semibold">
+            Come dine with us. Savor the Sea.
+          </p>
+
+          {/* Right bottom stacked images */}
+          <div className="flex mt-16 gap-6 justify-end">
+            <img
+              src={aboutgirl}
+              alt="Guest enjoying seafood"
+              className="h-80 w-80 object-cover rounded-lg shadow-md"
+            />
+            <img
+              src={aboutsea}
+              alt="Seafood platter"
+              className="h-72 w-72 object-cover rounded-lg shadow-md"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* Bottom Left Text */}
+      <h1 className="absolute bottom-16 left-40 text-5xl md:text-6xl font-extrabold text-white z-30">
+        About Us
+      </h1>
+    </main>
+  );
+};
+
+export default AboutUs;

@@ -3,6 +3,8 @@ import rightImage from "../assets/hero-section.png";
 
 export default function HomePage() {
   return (
+
+    
     <main className="flex h-[90vh] text-white">
       {/* Left Side - 45% */}
       <div className="w-[45%] flex flex-col justify-center px-12">

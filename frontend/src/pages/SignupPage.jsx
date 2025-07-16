@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Eye, EyeOff } from "lucide-react"; // icons
 import { Link } from "react-router-dom";
+import backgroundImg from "../assets/background.jpg";
 
 // Adjust the import path as needed or just use <img> with src string if you prefer
 import signupImage from "../assets/loginpage.png"; // Adjust path based on your project structure
@@ -15,6 +16,22 @@ export default function SignupPage() {
   });
 
   const [showPassword, setShowPassword] = useState(false);
+
+  // SVGs for eye open and eye closed
+  const EyeOpen = (
+    <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2">
+      <circle cx="12" cy="12" r="3" />
+      <path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7z" />
+    </svg>
+  );
+  const EyeClosed = (
+    <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M1 1l22 22" />
+      <path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-6 0-10-7-10-7a21.81 21.81 0 0 1 5.06-5.94M9.53 9.53A3 3 0 0 0 12 15a3 3 0 0 0 2.47-5.47" />
+      <path d="M14.12 14.12A3 3 0 0 1 9.88 9.88" />
+      <path d="M22 12s-4-7-10-7a10.94 10.94 0 0 0-4.12.94" />
+    </svg>
+  );
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -44,18 +61,16 @@ export default function SignupPage() {
       </div>
 
       {/* Right Side: Form */}
-      <div className="w-1/2 flex items-center justify-center bg-black text-white relative overflow-hidden">
-        <div className="absolute inset-0 opacity-5">
-          <div
-            className="absolute inset-0"
-            style={{
-              backgroundImage: `radial-gradient(circle at 25% 25%, #ff6b35 0%, transparent 50%), 
-                                radial-gradient(circle at 75% 75%, #ff6b35 0%, transparent 50%)`,
-            }}
-          />
-        </div>
-
-        <div className="w-4/5 max-w-lg space-y-6 relative z-10">
+      <div className="w-1/2 flex items-center justify-center relative overflow-hidden">
+        {/* Layout Background Image */}
+        <img
+          src={backgroundImg}
+          alt="Background"
+          className="absolute inset-0 w-full h-full object-cover blur-md z-0"
+          style={{ filter: 'blur(4px)' }}
+        />
+        <div className="absolute inset-0 bg-black/70 z-0" />
+        <div className="w-4/5 max-w-lg space-y-6 relative z-10 text-white">
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold mb-2">Register</h1>
           </div>
@@ -127,11 +142,11 @@ export default function SignupPage() {
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
+                  onClick={() => setShowPassword((prev) => !prev)}
                   className="absolute inset-y-0 right-4 flex items-center text-gray-600"
-                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  tabIndex={-1}
                 >
-                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  {showPassword ? EyeOpen : EyeClosed}
                 </button>
               </div>
             </div>

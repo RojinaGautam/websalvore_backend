@@ -5,12 +5,11 @@ import { Link } from "react-router-dom";
 export default function Navbar() {
   return (
     <div className="fixed top-0 w-full flex items-center justify-between z-50">
-      <img
-        src={logo}
-        alt="Company Logo"
-        width={120}
-        height={40}
-      />
+    <img
+  src={logo}
+  alt="Company Logo"
+  style={{ width: '60px', height: '60px' }}
+/>
 
       {/* 🔹 Navbar Section (right) */}
       <nav className="w-[60%] h-16 bg-[#ca3d2a] rounded-l-full flex items-center justify-between px-8 shadow-lg">

@@ -4,17 +4,37 @@ import Layout from "./components/Layout";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import HomePage from "./pages/HomePage";
+import AboutUs from "./pages/AboutUs";
+import MenuPage from "./pages/MenuPage";
+import VisitusPage from "./pages/VisitusPage";
+import AdminDashboard from "../Admin/AdminDashboard";
+import TestimonialPage from "./pages/TestimonialPage";
 
 function App() {
   return (
     <Router>
-      <Layout>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignupPage />} />
-        </Routes>
-      </Layout>
+      <Routes>
+        {/* Public/User routes wrapped in Layout */}
+        <Route
+          path="/*"
+          element={
+            <Layout>
+              <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/signup" element={<SignupPage />} />
+                <Route path="/about" element={<AboutUs />} />
+                <Route path="/menu" element={<MenuPage />} />
+                <Route path="/visit-us" element={<VisitusPage />} />
+                <Route path="/testimonial" element={<TestimonialPage />} />
+                {/* Add more public routes here as needed */}
+              </Routes>
+            </Layout>
+          }
+        />
+        {/* Admin route NOT wrapped in Layout */}
+        <Route path="/admin/*" element={<AdminDashboard />} />
+      </Routes>
     </Router>
   );
 }
