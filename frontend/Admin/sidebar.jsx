@@ -1,14 +1,15 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
-  TrendingUp, ShoppingCart, Utensils, Users, BarChart, Settings
+  TrendingUp, ShoppingCart, Utensils, Users, BarChart, Settings, LogOut
 } from 'lucide-react';
 
 const sidebarItems = [
   { id: 'overview', label: 'Overview', icon: TrendingUp, to: '/admin' },
   { id: 'menu', label: 'Menu Management', icon: Utensils, to: '/admin/menu' },
   { id: 'team', label: 'Team & Management', icon: Users, to: '/admin/team' },
-  // Add more items as needed
+  { id: 'settings', label: 'Settings', icon: Settings, to: '/admin/settings' }, // Added Settings
+  { id: 'contact', label: 'Contact', icon: BarChart, to: '/admin/contact' },   // Added Contact (using BarChart as placeholder)
 ];
 
 const Sidebar = () => {
@@ -25,7 +26,7 @@ const Sidebar = () => {
             <Link
               key={item.id}
               to={item.to}
-              className={`w-full flex items-center px-6 py-3 text-left hover:bg-gray-50 transition-colors rounded-lg mb-1 ${
+              className={`w-full flex items-center px-6 py-3 text-left hover:bg-gray-50 transition-colors rounded-lg mb-10 last:mb-0 ${
                 isActive ? 'bg-blue-50 text-blue-600 border-r-2 border-blue-600' : 'text-gray-700'
               }`}
             >
@@ -35,6 +36,13 @@ const Sidebar = () => {
           );
         })}
       </nav>
+      <button
+        className="w-full flex items-center px-6 py-3 text-left text-red-600 hover:bg-red-50 transition-colors rounded-lg mt-auto mb-6"
+        // onClick={handleLogout} // Add your logout logic here
+      >
+        <LogOut className="w-5 h-5 mr-3" />
+        Logout
+      </button>
     </div>
   );
 };
