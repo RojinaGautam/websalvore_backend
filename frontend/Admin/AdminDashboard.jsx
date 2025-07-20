@@ -4,6 +4,11 @@ import AdminLayout from './AdminLayout';
 import DashboardPage from './DashboardPage';
 import MenuPage from './MenuPage';
 import TeamPage from './TeamPage';
+import SettingPage from './SettingPage';
+import ContactPage from './ContactPage';
+import OrderPage from './OrderPage';
+
+
 
 
 const AdminDashboard = () => (
@@ -12,6 +17,9 @@ const AdminDashboard = () => (
       <Route path="/" element={<DashboardPage />} />
       <Route path="menu" element={<MenuPage />} />
       <Route path="team" element={<TeamPage />} />
+      <Route path="settings" element={<SettingPage />} />
+      <Route path="contact" element={<ContactPage />} />
+      <Route path="orders" element={<OrderPage />} />
       {/* Add more admin subpages here as needed */}
     </Routes>
   </AdminLayout>

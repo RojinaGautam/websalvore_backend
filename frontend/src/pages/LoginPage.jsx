@@ -1,11 +1,15 @@
 // src/pages/LoginPage.jsx
 import React, { useState } from "react";
 import loginImage from "../assets/loginpage.png"; // Adjust path based on your project
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import backgroundImg from "../assets/background.jpg";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   // SVGs for eye open and eye closed
   const EyeOpen = (
@@ -22,6 +26,41 @@ export default function LoginPage() {
       <path d="M22 12s-4-7-10-7a10.94 10.94 0 0 0-4.12.94" />
     </svg>
   );
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    try {
+      const res = await fetch("http://localhost:4000/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.message || data.error || "Login failed");
+        return;
+      }
+      // Save token and user info, then redirect
+      localStorage.setItem("token", data.data.access_token);
+      // Decode the JWT to get user info (or use backend response if available)
+      const payload = JSON.parse(atob(data.data.access_token.split('.')[1]));
+      if (payload && payload.user) {
+        const userObj = {
+          id: payload.user.id,
+          name: payload.user.name,
+          email: payload.user.email
+        };
+        localStorage.setItem("user", JSON.stringify(userObj));
+        console.log("User logged in successfully:", userObj);
+        console.log("Token:", data.data.access_token);
+      }
+      navigate("/", { replace: true });
+      window.location.reload();
+    } catch (err) {
+      setError("Network error. Please try again.");
+    }
+  };
 
   return (
     <div className="flex h-screen">
@@ -52,7 +91,7 @@ export default function LoginPage() {
               Create new account
             </Link>
           </p>
-          <form className="space-y-4">
+          <form className="space-y-4" onSubmit={handleSubmit}>
             {/* Email */}
             <div>
               <label className="block mb-1 text-white text-lg italic" htmlFor="email">
@@ -62,6 +101,9 @@ export default function LoginPage() {
                 type="email"
                 id="email"
                 className="w-full px-4 py-3 rounded-full bg-white text-black"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                required
               />
             </div>
             {/* Password */}
@@ -74,6 +116,9 @@ export default function LoginPage() {
                   type={showPassword ? "text" : "password"}
                   id="password"
                   className="w-full px-4 py-3 rounded-full bg-white text-black pr-10"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  required
                 />
                 <button
                   type="button"
@@ -90,6 +135,7 @@ export default function LoginPage() {
                 </a>
               </div>
             </div>
+            {error && <div className="text-red-400 text-center">{error}</div>}
             <button
               type="submit"
               className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-full"

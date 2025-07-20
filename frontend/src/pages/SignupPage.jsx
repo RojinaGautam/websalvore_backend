@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Eye, EyeOff } from "lucide-react"; // icons
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import backgroundImg from "../assets/background.jpg";
 
 // Adjust the import path as needed or just use <img> with src string if you prefer
@@ -16,6 +16,9 @@ export default function SignupPage() {
   });
 
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const navigate = useNavigate();
 
   // SVGs for eye open and eye closed
   const EyeOpen = (
@@ -41,10 +44,32 @@ export default function SignupPage() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Registration data:", formData);
-    // Handle registration logic here
+    setError("");
+    setSuccess("");
+    const name = `${formData.firstName} ${formData.lastName}`.trim();
+    const payload = {
+      name,
+      email: formData.email,
+      password: formData.password,
+    };
+    try {
+      const res = await fetch("http://localhost:4000/api/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.message || data.error || "Signup failed");
+        return;
+      }
+      setSuccess("Signup successful! Redirecting to login...");
+      setTimeout(() => navigate("/login"), 1500);
+    } catch (err) {
+      setError("Network error. Please try again.");
+    }
   };
 
   return (
@@ -76,6 +101,8 @@ export default function SignupPage() {
           </div>
 
           <form className="space-y-5" onSubmit={handleSubmit}>
+            {error && <div className="text-red-400 text-center">{error}</div>}
+            {success && <div className="text-green-400 text-center">{success}</div>}
             {/* Name Fields */}
             <div className="grid grid-cols-2 gap-4">
               <div>

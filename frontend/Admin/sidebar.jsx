@@ -6,6 +6,7 @@ import {
 
 const sidebarItems = [
   { id: 'overview', label: 'Overview', icon: TrendingUp, to: '/admin' },
+  { id: 'orders', label: 'Orders', icon: ShoppingCart, to: '/admin/orders' }, // Added Orders
   { id: 'menu', label: 'Menu Management', icon: Utensils, to: '/admin/menu' },
   { id: 'team', label: 'Team & Management', icon: Users, to: '/admin/team' },
   { id: 'settings', label: 'Settings', icon: Settings, to: '/admin/settings' }, // Added Settings
@@ -15,9 +16,9 @@ const sidebarItems = [
 const Sidebar = () => {
   const location = useLocation();
   return (
-    <div className="w-64 bg-white shadow-lg h-full">
+    <div className="w-64 h-full shadow-lg" style={{ backgroundColor: '#D13B24' }}>
       <div className="p-6 border-b">
-        <h1 className="text-xl font-bold text-gray-800">Restaurant Admin</h1>
+        <h1 className="text-xl font-bold text-white">Restaurant Admin</h1>
       </div>
       <nav className="mt-6">
         {sidebarItems.map((item) => {
@@ -26,12 +27,12 @@ const Sidebar = () => {
             <Link
               key={item.id}
               to={item.to}
-              className={`w-full flex items-center px-6 py-3 text-left hover:bg-gray-50 transition-colors rounded-lg mb-10 last:mb-0 ${
-                isActive ? 'bg-blue-50 text-blue-600 border-r-2 border-blue-600' : 'text-gray-700'
+              className={`w-full flex items-center px-6 py-3 text-left transition-colors rounded-lg mb-10 last:mb-0 ${
+                isActive ? 'bg-yellow-400 text-yellow-900 border-r-2 border-yellow-400' : 'text-gray-700 hover:bg-gray-50'
               }`}
             >
-              <item.icon className="w-5 h-5 mr-3" />
-              {item.label}
+              <item.icon className={`w-5 h-5 mr-3 font-bold ${isActive ? 'text-yellow-900' : 'text-white'}`} />
+              <span className={`font-bold ${isActive ? 'text-yellow-900' : 'text-white'}`}>{item.label}</span>
             </Link>
           );
         })}
@@ -40,8 +41,8 @@ const Sidebar = () => {
         className="w-full flex items-center px-6 py-3 text-left text-red-600 hover:bg-red-50 transition-colors rounded-lg mt-auto mb-6"
         // onClick={handleLogout} // Add your logout logic here
       >
-        <LogOut className="w-5 h-5 mr-3" />
-        Logout
+        <LogOut className="w-5 h-5 mr-3 text-white" />
+        <span className="font-bold text-white">Logout</span>
       </button>
     </div>
   );

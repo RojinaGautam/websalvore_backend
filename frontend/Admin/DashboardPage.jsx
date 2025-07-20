@@ -1,4 +1,5 @@
 import React from 'react';
+import backgroundImg from '../src/assets/background.jpg';
 import {
   DollarSign, ShoppingCart, Users, Star
 } from 'lucide-react';
@@ -23,26 +24,32 @@ const recentOrders = [
 ];
 
 const StatsCard = ({ title, value, change, icon: Icon, color }) => (
-  <div className="bg-white rounded-lg shadow p-6">
-    <div className="flex items-center justify-between">
-      <div>
-        <p className="text-sm font-medium text-gray-600">{title}</p>
-        <p className="text-2xl font-bold text-gray-900">{value}</p>
-        <p className={`text-sm ${change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-          {change >= 0 ? '+' : ''}{change}% from last month
-        </p>
-      </div>
-      <div className={`p-3 rounded-full ${color}`}>
-        <Icon className="w-6 h-6 text-white" />
-      </div>
+  <div className="bg-white rounded-xl shadow-md p-6 flex items-center justify-between">
+    <div>
+      <p className="text-sm font-medium text-gray-500">{title}</p>
+      <p className="text-2xl font-bold text-gray-900">{value}</p>
+      <p className={`text-sm ${change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+        {change >= 0 ? '+' : ''}{change}% from last month
+      </p>
+    </div>
+    <div className={`p-3 rounded-full ${color} flex items-center justify-center`}>
+      <Icon className="w-6 h-6 text-white" />
     </div>
   </div>
 );
 
 const DashboardPage = () => (
-  <div className="space-y-6">
+  <div
+    className="min-h-screen bg-gray-100 p-8"
+    style={{
+      backgroundImage: `url(${backgroundImg})`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+    }}
+  >
     {/* Stats Cards */}
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
       <StatsCard
         title="Total Revenue"
         value="$92,450"
@@ -74,8 +81,8 @@ const DashboardPage = () => (
     </div>
 
     {/* Charts */}
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <div className="bg-white rounded-lg shadow p-6">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      <div className="bg-white rounded-xl shadow-md p-6">
         <h3 className="text-lg font-semibold mb-4">Sales Overview</h3>
         <ResponsiveContainer width="100%" height={300}>
           <AreaChart data={salesData}>
@@ -99,47 +106,6 @@ const DashboardPage = () => (
             <Line type="monotone" dataKey="orders" stroke="#10B981" strokeWidth={2} />
           </LineChart>
         </ResponsiveContainer>
-      </div>
-    </div>
-
-    {/* Recent Orders */}
-    <div className="bg-white rounded-lg shadow">
-      <div className="p-6 border-b">
-        <h3 className="text-lg font-semibold">Recent Orders</h3>
-      </div>
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Order ID</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Items</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Time</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {recentOrders.map((order) => (
-              <tr key={order.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap font-medium">{order.id}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{order.customer}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{order.items}</td>
-                <td className="px-6 py-4 whitespace-nowrap">${order.total}</td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`px-2 py-1 text-xs rounded-full ${
-                    order.status === 'Completed' ? 'bg-green-100 text-green-800' :
-                    order.status === 'Preparing' ? 'bg-yellow-100 text-yellow-800' :
-                    'bg-blue-100 text-blue-800'
-                  }`}>
-                    {order.status}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-gray-500">{order.time}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
       </div>
     </div>
   </div>

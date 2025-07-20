@@ -1,59 +1,86 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Star, Fish, Waves, User } from 'lucide-react';
 import Layout from "../components/Layout";
 
 const TestimonialPage = () => {
-  const [testimonials, setTestimonials] = useState([
-    {
-      id: 1,
-      name: "Daniel Gallego",
-      rating: 5,
-      review: "“The seafood platter was absolutely amazing—fresh, flavorful, and beautifully served. A must-try!",
-      date: "2024-10-30",
-      dish: "Grilled seafood platter"
-    },
-    {
-      id: 2,
-      name: "Olivia Wilson",
-      rating: 5,
-      review: "“I come here often because the food is consistently great and the atmosphere is so welcoming.”",
-      date: "2024-12-08",
-      dish: "Barbecue Grilled Octopus with Oregano"
-    },
-    {
-      id: 3,
-      name: "Emma Rodriguez",
-      rating: 4,
-      review: "Great atmosphere and fresh seafood. The clam chowder was rich and creamy. Service was prompt and friendly. Will definitely return!",
-      date: "2024-07-20",
-      dish: "Clam Chowder"
-    }
-  ]);
+  const [testimonials, setTestimonials] = useState([]);
+
+  const user = JSON.parse(localStorage.getItem("user"));
 
   const [newTestimonial, setNewTestimonial] = useState({
     name: '',
+    email: user ? user.email : '',
+    message: '',
     rating: 5,
-    review: '',
-    dish: ''
+    favouriteDish: ''
   });
 
   const [showForm, setShowForm] = useState(false);
+  const [success, setSuccess] = useState('');
+  const [error, setError] = useState('');
+  const [showSuccessBanner, setShowSuccessBanner] = useState(false);
 
-  const handleSubmit = () => {
-    if (newTestimonial.name && newTestimonial.review) {
-      const testimonial = {
-        id: testimonials.length + 1,
-        ...newTestimonial,
-        date: new Date().toISOString().split('T')[0]
-      };
-      setTestimonials([testimonial, ...testimonials]);
-      setNewTestimonial({
-        name: '',
-        rating: 5,
-        review: '',
-        dish: ''
+  // Fetch testimonials from backend
+  useEffect(() => {
+    fetch('http://localhost:4000/api/testimonials')
+      .then(res => res.json())
+      .then(data => {
+        console.log('Fetched testimonials:', data);
+        if (data.data) {
+          setTestimonials(data.data);
+        }
+      })
+      .catch(err => {
+        console.error('Failed to fetch testimonials:', err);
       });
-      setShowForm(false);
+  }, []);
+
+  const handleSubmit = async () => {
+    setSuccess('');
+    setError('');
+    if (!user) {
+      setError('You must be logged in to submit a testimonial.');
+      return;
+    }
+    if (newTestimonial.name && newTestimonial.message && newTestimonial.favouriteDish) {
+      try {
+        const token = localStorage.getItem('token');
+        const res = await fetch('http://localhost:4000/api/testimonials', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ ...newTestimonial, email: user.email })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          setSuccess('Thank you for your testimonial!');
+          setShowSuccessBanner(true);
+          setShowForm(false);
+          setNewTestimonial({
+            name: '',
+            email: user.email,
+            message: '',
+            rating: 5,
+            favouriteDish: ''
+          });
+          // Fetch latest testimonials after successful submission
+          fetch('http://localhost:4000/api/testimonials')
+            .then(res => res.json())
+            .then(data => {
+              if (data.data) {
+                setTestimonials(data.data);
+              }
+            });
+        } else {
+          setError(data.message || data.error || 'Failed to submit testimonial');
+        }
+      } catch (err) {
+        setError('Network error. Please try again.');
+      }
+    } else {
+      setError('Please fill in all required fields.');
     }
   };
 
@@ -73,6 +100,13 @@ const TestimonialPage = () => {
   return (
     <Layout>
       <div className="max-w-4xl mx-auto p-6">
+        {/* Success Banner */}
+        {showSuccessBanner && (
+          <div className="mb-6 p-4 bg-green-100 border border-green-400 text-green-800 rounded-lg flex items-center justify-between">
+            <span>{success}</span>
+            <button onClick={() => setShowSuccessBanner(false)} className="ml-4 text-green-800 font-bold">&times;</button>
+          </div>
+        )}
         {/* Add Review Button */}
         <div className="mb-8 text-center">
           <button
@@ -90,65 +124,74 @@ const TestimonialPage = () => {
               <User className="w-6 h-6 mr-2 text-[#ca3d2a]" />
               Share Your Review
             </h2>
-            <div className="space-y-6">
-              <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <div className="block text-gray-700 font-semibold mb-2">Your Name</div>
-                  <input
-                    type="text"
-                    value={newTestimonial.name}
-                    onChange={(e) => setNewTestimonial({ ...newTestimonial, name: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter your name"
-                  />
+            {/* Success/Error Messages */}
+            {success && <div className="text-green-600 text-center mb-4">{success}</div>}
+            {error && <div className="text-red-600 text-center mb-4">{error}</div>}
+            {!user ? (
+              <div className="text-red-500 text-center mb-4">You must be logged in to submit a testimonial.</div>
+            ) : (
+              <div className="space-y-6">
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <div className="block text-gray-700 font-semibold mb-2">Your Name</div>
+                    <input
+                      type="text"
+                      value={newTestimonial.name}
+                      onChange={(e) => setNewTestimonial({ ...newTestimonial, name: e.target.value })}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Enter your name"
+                      disabled={!user}
+                    />
+                  </div>
+                  <div>
+                    <div className="block text-gray-700 font-semibold mb-2">Favorite Dish (Optional)</div>
+                    <input
+                      type="text"
+                      value={newTestimonial.favouriteDish}
+                      onChange={(e) => setNewTestimonial({ ...newTestimonial, favouriteDish: e.target.value })}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="e.g., Grilled Salmon"
+                      disabled={!user}
+                    />
+                  </div>
                 </div>
                 <div>
-                  <div className="block text-gray-700 font-semibold mb-2">Favorite Dish (Optional)</div>
-                  <input
-                    type="text"
-                    value={newTestimonial.dish}
-                    onChange={(e) => setNewTestimonial({ ...newTestimonial, dish: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="e.g., Grilled Salmon"
+                  <div className="block text-gray-700 font-semibold mb-2">Rating</div>
+                  <div className="flex space-x-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => user && setNewTestimonial({ ...newTestimonial, rating: star })}
+                        className="focus:outline-none"
+                        disabled={!user}
+                      >
+                        <Star
+                          className={`w-8 h-8 ${star <= newTestimonial.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'} hover:text-yellow-400 transition-colors`}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <div className="block text-gray-700 font-semibold mb-2">Your Review</div>
+                  <textarea
+                    value={newTestimonial.message}
+                    onChange={(e) => setNewTestimonial({ ...newTestimonial, message: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent h-32 resize-none"
+                    placeholder="Share your experience with us..."
+                    disabled={!user}
                   />
                 </div>
+                <button
+                  onClick={handleSubmit}
+                  className="w-full bg-[#ca3d2a] text-white py-3 rounded-lg font-semibold hover:bg-red-700 transition-all duration-300 transform hover:scale-105"
+                  disabled={!user}
+                >
+                  Submit Review
+                </button>
               </div>
-
-              <div>
-                <div className="block text-gray-700 font-semibold mb-2">Rating</div>
-                <div className="flex space-x-1">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <button
-                      key={star}
-                      type="button"
-                      onClick={() => handleStarClick(star)}
-                      className="focus:outline-none"
-                    >
-                      <Star
-                        className={`w-8 h-8 ${star <= newTestimonial.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'} hover:text-yellow-400 transition-colors`}
-                      />
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <div className="block text-gray-700 font-semibold mb-2">Your Review</div>
-                <textarea
-                  value={newTestimonial.review}
-                  onChange={(e) => setNewTestimonial({ ...newTestimonial, review: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent h-32 resize-none"
-                  placeholder="Share your experience with us..."
-                />
-              </div>
-
-              <button
-                onClick={handleSubmit}
-                className="w-full bg-[#ca3d2a] text-white py-3 rounded-lg font-semibold hover:bg-red-700 transition-all duration-300 transform hover:scale-105"
-              >
-                Submit Review
-              </button>
-            </div>
+            )}
           </div>
         )}
 
@@ -164,19 +207,16 @@ const TestimonialPage = () => {
                   <h3 className="font-bold text-gray-800 text-lg">{testimonial.name}</h3>
                   <div className="flex">{renderStars(testimonial.rating)}</div>
                 </div>
-                
-                {testimonial.dish && (
+                {testimonial.favouriteDish && (
                   <div className="mb-3">
                     <span className="inline-block bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded-full">
-                      {testimonial.dish}
+                      {testimonial.favouriteDish}
                     </span>
                   </div>
                 )}
-                
-                <p className="text-gray-600 mb-4 leading-relaxed">{testimonial.review}</p>
-                
+                <p className="text-gray-600 mb-4 leading-relaxed">{testimonial.message}</p>
                 <div className="text-sm text-gray-500 border-t pt-3">
-                  {new Date(testimonial.date).toLocaleDateString('en-US', {
+                  {testimonial.createdAt && new Date(testimonial.createdAt).toLocaleDateString('en-US', {
                     year: 'numeric',
                     month: 'long',
                     day: 'numeric'
@@ -196,7 +236,9 @@ const TestimonialPage = () => {
             </div>
             <div>
               <div className="text-3xl font-bold mb-2">
-                {(testimonials.reduce((acc, t) => acc + t.rating, 0) / testimonials.length).toFixed(1)}
+                {testimonials.length > 0
+                  ? (testimonials.reduce((acc, t) => acc + t.rating, 0) / testimonials.length).toFixed(1)
+                  : '0.0'}
               </div>
               <div className="text-red-100">Average Rating</div>
             </div>

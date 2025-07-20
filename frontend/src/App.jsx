@@ -10,6 +10,7 @@ import VisitusPage from "./pages/VisitusPage";
 import AdminDashboard from "../Admin/AdminDashboard";
 import TestimonialPage from "./pages/TestimonialPage";
 import AddtocartPagePage from "./pages/AddtocartPage";
+import Reservation from "./pages/Reservation";
 
 
 
@@ -31,6 +32,7 @@ function App() {
                 <Route path="/visit-us" element={<VisitusPage />} />
                 <Route path="/testimonial" element={<TestimonialPage />} />
                 <Route path="/addtocart" element={<AddtocartPagePage />} />
+                <Route path="/reservation" element={<Reservation />} />
                 {/* Add more public routes here as needed */}
               </Routes>
             </Layout>
