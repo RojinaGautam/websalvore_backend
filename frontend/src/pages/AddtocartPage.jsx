@@ -4,43 +4,10 @@ import {
   CreditCard, Wallet, ShoppingCart, Star, Utensils, Fish,
   Home, Building, CheckCircle, AlertCircle, ArrowRight
 } from 'lucide-react';
+import { useCart } from '../components/CartContext.jsx';
 
 const AddtocartPage = () => {
-  const [cartItems, setCartItems] = useState([
-    {
-      id: 1,
-      name: 'Simple Seasoned Grilled Fish',
-      price: 18,
-      image: '/api/placeholder/120/120',
-      quantity: 1,
-      category: 'Signature Dishes',
-      rating: 4.8,
-      description: 'Fresh fish with herbs and lemon',
-      customizations: ['Medium cooked', 'Extra lemon']
-    },
-    {
-      id: 2,
-      name: 'Blue Lagoon Cocktail',
-      price: 14,
-      image: '/api/placeholder/120/120',
-      quantity: 1,
-      category: 'Beverage',
-      rating: 4.9,
-      description: 'yummy lagoon with fresh mint',
-      customizations: ['No ice', 'Extra mint']
-    },
-    {
-      id: 3,
-      name: 'Boiled Sea Food Platter',
-      price: 40,
-      image: '/api/placeholder/120/120',
-      quantity: 1,
-      category: 'Special Menu',
-      rating: 4.7,
-      description: 'Traditional boiled seafood',
-      customizations: ['no spices', 'Extra butter']
-    }
-  ]);
+  const { cartItems, updateQuantity, removeFromCart, clearCart } = useCart();
 
   const [deliveryInfo, setDeliveryInfo] = useState({
     type: 'delivery', // delivery or pickup
@@ -49,7 +16,6 @@ const AddtocartPage = () => {
     city: '',
     zipCode: '',
     phone: '',
-    email: '',
     specialInstructions: ''
   });
 
@@ -107,29 +73,6 @@ const AddtocartPage = () => {
     }
   ];
 
-  const updateQuantity = (id, change) => {
-    setCartItems(prevItems => 
-      prevItems.map(item => 
-        item.id === id 
-          ? { ...item, quantity: Math.max(1, item.quantity + change) }
-          : item
-      )
-    );
-  };
-
-  const removeItem = (id) => {
-    setCartItems(prevItems => prevItems.filter(item => item.id !== id));
-  };
-
-  const addToCart = (item) => {
-    const existingItem = cartItems.find(cartItem => cartItem.id === item.id);
-    if (existingItem) {
-      updateQuantity(item.id, 1);
-    } else {
-      setCartItems(prevItems => [...prevItems, { ...item, quantity: 1, customizations: [] }]);
-    }
-  };
-
   const calculateSubtotal = () => {
     return cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   };
@@ -138,8 +81,11 @@ const AddtocartPage = () => {
   const tax = calculateSubtotal() * 0.08;
   const total = calculateSubtotal() + deliveryFee + tax;
 
-  const handlePlaceOrder = () => {
-    if (!deliveryInfo.phone || !deliveryInfo.email) {
+  const handlePlaceOrder = async () => {
+    // Get user email from localStorage
+    const user = JSON.parse(localStorage.getItem('user'));
+    const userEmail = user?.email || '';
+    if (!deliveryInfo.phone) {
       alert('Please fill in all required fields');
       return;
     }
@@ -147,9 +93,48 @@ const AddtocartPage = () => {
       alert('Please enter your delivery address');
       return;
     }
-    
-    // Here you would typically send the order to your backend
-    alert('Order placed successfully! You will receive a confirmation email shortly.');
+    // Prepare order data
+    const orderData = {
+      userId: user?.id,
+      deliveryType: deliveryInfo.type,
+      address: deliveryInfo.address,
+      phone: deliveryInfo.phone,
+      email: userEmail,
+      specialInstructions: deliveryInfo.specialInstructions,
+      paymentMethod,
+      orderType,
+      scheduledTime: orderType === 'scheduled' ? scheduledTime : null,
+      status: 'pending',
+      total,
+      items: cartItems.map(item => ({
+        menuItemId: item.id,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+        customizations: item.customizations || []
+      }))
+    };
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch('http://localhost:4000/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(orderData)
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        clearCart();
+        localStorage.removeItem('cartItems');
+        alert('Order placed successfully! You will receive a confirmation email shortly.');
+      } else {
+        alert(data.error || 'Failed to place order.');
+      }
+    } catch (err) {
+      alert('Failed to place order.');
+    }
   };
 
   return (
@@ -232,7 +217,7 @@ const AddtocartPage = () => {
                             </div>
                           </div>
                           <button
-                            onClick={() => removeItem(item.id)}
+                            onClick={() => removeFromCart(item.id)}
                             className="text-red-500 hover:text-red-700 p-1"
                           >
                             <Trash2 className="w-4 h-4" />

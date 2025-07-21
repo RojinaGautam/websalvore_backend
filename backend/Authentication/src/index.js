@@ -10,6 +10,7 @@ import { createUploadsFolder } from "./security/helper.js";
 import cors from "cors";
 import { testimonialRouter } from "./route/index.js";
 import { menuRouter } from "./route/index.js";
+import orderRouter from "./route/orderRoute.js";
 
 dotenv.config();
 
@@ -28,6 +29,7 @@ app.use("/api/auth", authRouter);
 app.use("/api/file", router);
 app.use("/api/testimonials", testimonialRouter);
 app.use("/api/menu", menuRouter);
+app.use("/api/orders", orderRouter);
 createUploadsFolder();
 app.listen(4000, function () {
   console.log("project running in port ", port);

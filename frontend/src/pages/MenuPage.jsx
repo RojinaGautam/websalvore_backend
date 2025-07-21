@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import backgroundImg from "../assets/background.jpg";
+import { useCart } from '../components/CartContext.jsx';
+import { useNavigate } from 'react-router-dom';
 
 const filterOptions = ["Signature Dishes", "Special Menu", "Beverage Menu"];
 
@@ -8,6 +10,8 @@ const MenuPage = () => {
   const [menuItems, setMenuItems] = useState([]);
   const [fetching, setFetching] = useState(false);
   const [fetchError, setFetchError] = useState('');
+  const { addToCart } = useCart();
+  const navigate = useNavigate();
 
   // Fetch menu items from backend
   const fetchMenuItems = async () => {
@@ -92,7 +96,18 @@ const MenuPage = () => {
                 <div className="text-center">
                   <div className="font-semibold italic text-base text-black mb-2">{item.name}</div>
                   <div className="text-black font-bold text-2xl mb-2">${item.price}</div>
-                  <button className="bg-yellow-300 hover:bg-yellow-400 text-black font-bold py-2 px-6 rounded-full transition">
+                  <button
+                    className="bg-yellow-300 hover:bg-yellow-400 text-black font-bold py-2 px-6 rounded-full transition"
+                    onClick={() => {
+                      const token = localStorage.getItem('token');
+                      if (!token) {
+                        navigate('/login');
+                        return;
+                      }
+                      addToCart({ ...item, customizations: item.customizations || [] });
+                      alert(`${item.name} added to cart!`);
+                    }}
+                  >
                     ADD TO CART
                   </button>
                   {item.description && (

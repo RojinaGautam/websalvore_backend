@@ -1,101 +1,44 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Filter, Eye, Check, X, Clock, DollarSign, User, MapPin, Phone } from 'lucide-react';
 
-const OrderPage= () => {
+const OrderPage = () => {
   const [orders, setOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedOrder, setSelectedOrder] = useState(null);
 
-  // Mock data - in real app, this would come from API
-  const mockOrders = [
-    {
-      id: 'ORD-001',
-      customerName: 'John Smith',
-      customerPhone: '+1-555-0123',
-      customerAddress: '123 Main St, City, State 12345',
-      items: [
-        { name: 'Margherita Pizza', quantity: 2, price: 18.99 },
-        { name: 'Garlic Bread', quantity: 1, price: 6.99 },
-        { name: 'Coca Cola', quantity: 2, price: 2.99 }
-      ],
-      total: 51.96,
-      status: 'pending',
-      orderTime: '2025-01-20T14:30:00',
-      estimatedTime: '45 mins',
-      paymentMethod: 'Credit Card',
-      orderType: 'delivery'
-    },
-    {
-      id: 'ORD-002',
-      customerName: 'Sarah Johnson',
-      customerPhone: '+1-555-0456',
-      customerAddress: 'Pickup Order',
-      items: [
-        { name: 'Caesar Salad', quantity: 1, price: 12.99 },
-        { name: 'Grilled Chicken', quantity: 1, price: 16.99 }
-      ],
-      total: 29.98,
-      status: 'preparing',
-      orderTime: '2025-01-20T14:45:00',
-      estimatedTime: '25 mins',
-      paymentMethod: 'Cash',
-      orderType: 'pickup'
-    },
-    {
-      id: 'ORD-003',
-      customerName: 'Mike Davis',
-      customerPhone: '+1-555-0789',
-      customerAddress: '456 Oak Ave, City, State 12345',
-      items: [
-        { name: 'Beef Burger', quantity: 3, price: 14.99 },
-        { name: 'French Fries', quantity: 3, price: 4.99 },
-        { name: 'Milkshake', quantity: 2, price: 5.99 }
-      ],
-      total: 71.93,
-      status: 'ready',
-      orderTime: '2025-01-20T15:00:00',
-      estimatedTime: '5 mins',
-      paymentMethod: 'Digital Wallet',
-      orderType: 'delivery'
-    },
-    {
-      id: 'ORD-004',
-      customerName: 'Emily Wilson',
-      customerPhone: '+1-555-0321',
-      customerAddress: 'Pickup Order',
-      items: [
-        { name: 'Pasta Carbonara', quantity: 1, price: 16.99 }
-      ],
-      total: 16.99,
-      status: 'completed',
-      orderTime: '2025-01-20T13:30:00',
-      estimatedTime: 'Completed',
-      paymentMethod: 'Credit Card',
-      orderType: 'pickup'
-    }
-  ];
-
   useEffect(() => {
-    setOrders(mockOrders);
-    setFilteredOrders(mockOrders);
+    const fetchOrders = async () => {
+      try {
+        const res = await fetch('http://localhost:4000/api/orders');
+        const data = await res.json();
+        if (data.success) {
+          setOrders(data.data);
+          setFilteredOrders(data.data);
+        } else {
+          setOrders([]);
+          setFilteredOrders([]);
+        }
+      } catch (err) {
+        setOrders([]);
+        setFilteredOrders([]);
+      }
+    };
+    fetchOrders();
   }, []);
 
   useEffect(() => {
     let filtered = orders;
-    
     if (searchTerm) {
       filtered = filtered.filter(order =>
-        order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        order.customerName.toLowerCase().includes(searchTerm.toLowerCase())
+        order.id.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (order.User?.name || '').toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-    
     if (statusFilter !== 'all') {
-      filtered = filtered.filter(order => order.status === statusFilter);
+      filtered = filtered.filter(order => order.orderStatus === statusFilter);
     }
-    
     setFilteredOrders(filtered);
   }, [searchTerm, statusFilter, orders]);
 
@@ -110,14 +53,27 @@ const OrderPage= () => {
     }
   };
 
-  const updateOrderStatus = (orderId, newStatus) => {
-    const updatedOrders = orders.map(order =>
-      order.id === orderId ? { ...order, status: newStatus } : order
-    );
-    setOrders(updatedOrders);
+  // Update orderStatus in backend and UI
+  const patchOrderStatus = async (orderId, orderStatus) => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`http://localhost:4000/api/orders/${orderId}/status`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ orderStatus })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setOrders(prev => prev.map(order => order.id === orderId ? { ...order, orderStatus: data.data.orderStatus } : order));
+      }
+    } catch (err) {}
   };
 
   const formatTime = (timeString) => {
+    if (!timeString) return '';
     return new Date(timeString).toLocaleTimeString('en-US', {
       hour: '2-digit',
       minute: '2-digit'
@@ -140,7 +96,7 @@ const OrderPage= () => {
               <div>
                 <p className="text-sm font-medium text-gray-600">Pending Orders</p>
                 <p className="text-2xl font-bold text-yellow-600">
-                  {orders.filter(o => o.status === 'pending').length}
+                  {orders.filter(o => o.orderStatus === 'P').length}
                 </p>
               </div>
               <Clock className="h-8 w-8 text-yellow-600" />
@@ -149,14 +105,12 @@ const OrderPage= () => {
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Preparing</p>
-                <p className="text-2xl font-bold text-blue-600">
-                  {orders.filter(o => o.status === 'preparing').length}
+                <p className="text-sm font-medium text-gray-600">Cancelled</p>
+                <p className="text-2xl font-bold text-red-600">
+                  {orders.filter(o => o.orderStatus === 'C').length}
                 </p>
               </div>
-              <div className="h-8 w-8 bg-blue-600 rounded-full flex items-center justify-center">
-                <div className="h-4 w-4 bg-white rounded-full animate-pulse"></div>
-              </div>
+              <X className="h-8 w-8 text-red-600" />
             </div>
           </div>
           <div className="bg-white rounded-lg shadow p-6">
@@ -164,7 +118,7 @@ const OrderPage= () => {
               <div>
                 <p className="text-sm font-medium text-gray-600">Ready</p>
                 <p className="text-2xl font-bold text-green-600">
-                  {orders.filter(o => o.status === 'ready').length}
+                  {orders.filter(o => o.orderStatus === 'R').length}
                 </p>
               </div>
               <Check className="h-8 w-8 text-green-600" />
@@ -175,7 +129,7 @@ const OrderPage= () => {
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Revenue</p>
                 <p className="text-2xl font-bold text-green-600">
-                  ${orders.reduce((sum, order) => sum + order.total, 0).toFixed(2)}
+                  ${orders.filter(o => o.orderStatus === 'D').reduce((sum, order) => sum + (order.total || 0), 0).toFixed(2)}
                 </p>
               </div>
               <DollarSign className="h-8 w-8 text-green-600" />
@@ -206,11 +160,10 @@ const OrderPage= () => {
                 onChange={(e) => setStatusFilter(e.target.value)}
               >
                 <option value="all">All Orders</option>
-                <option value="pending">Pending</option>
-                <option value="preparing">Preparing</option>
-                <option value="ready">Ready</option>
-                <option value="completed">Completed</option>
-                <option value="cancelled">Cancelled</option>
+                <option value="P">Pending</option>
+                <option value="R">Ready</option>
+                <option value="D">Delivered</option>
+                <option value="C">Cancelled</option>
               </select>
             </div>
           </div>
@@ -238,6 +191,9 @@ const OrderPage= () => {
                     Status
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Order Status
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
@@ -249,30 +205,30 @@ const OrderPage= () => {
                       <div>
                         <div className="text-sm font-medium text-gray-900">{order.id}</div>
                         <div className="text-sm text-gray-500">
-                          {formatTime(order.orderTime)} • {order.orderType}
+                          {order.createdAt ? formatTime(order.createdAt) : ''} • {order.orderType}
                         </div>
-                        <div className="text-sm text-gray-500">ETA: {order.estimatedTime}</div>
+                        <div className="text-sm text-gray-500">{order.address || 'N/A'}</div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <User className="h-4 w-4 text-gray-400 mr-2" />
                         <div>
-                          <div className="text-sm font-medium text-gray-900">{order.customerName}</div>
+                          <div className="text-sm font-medium text-gray-900">{order.User?.name || 'N/A'}</div>
                           <div className="text-sm text-gray-500 flex items-center">
                             <Phone className="h-3 w-3 mr-1" />
-                            {order.customerPhone}
+                            {order.phone || 'N/A'}
                           </div>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-sm text-gray-900">
-                        {order.items.length} item{order.items.length > 1 ? 's' : ''}
+                        {order.OrderItems?.length || 0} item{order.OrderItems?.length > 1 ? 's' : ''}
                       </div>
                       <div className="text-sm text-gray-500">
-                        {order.items[0]?.name}
-                        {order.items.length > 1 && ` +${order.items.length - 1} more`}
+                        {order.OrderItems && order.OrderItems[0]?.name}
+                        {order.OrderItems && order.OrderItems.length > 1 && ` +${order.OrderItems.length - 1} more`}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -284,6 +240,11 @@ const OrderPage= () => {
                         {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                       </span>
                     </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full border">
+                        {order.orderStatus || 'P'}
+                      </span>
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                       <button
                         onClick={() => setSelectedOrder(order)}
@@ -292,38 +253,30 @@ const OrderPage= () => {
                         <Eye className="h-4 w-4 mr-1" />
                         View
                       </button>
-                      {order.status === 'pending' && (
+                      {/* Show Ready if orderStatus is P, Delivered if R, nothing if D or C */}
+                      {order.orderStatus === 'P' && (
                         <button
-                          onClick={() => updateOrderStatus(order.id, 'preparing')}
+                          onClick={() => patchOrderStatus(order.id, 'R')}
                           className="text-green-600 hover:text-green-900 inline-flex items-center"
                         >
-                          <Check className="h-4 w-4 mr-1" />
-                          Accept
+                          Ready (R)
                         </button>
                       )}
-                      {order.status === 'preparing' && (
+                      {order.orderStatus === 'R' && (
                         <button
-                          onClick={() => updateOrderStatus(order.id, 'ready')}
-                          className="text-green-600 hover:text-green-900"
+                          onClick={() => patchOrderStatus(order.id, 'D')}
+                          className="text-blue-600 hover:text-blue-900 inline-flex items-center"
                         >
-                          Mark Ready
+                          Delivered (D)
                         </button>
                       )}
-                      {order.status === 'ready' && (
+                      {/* Show Cancel for all except already cancelled or delivered */}
+                      {order.orderStatus !== 'C' && order.orderStatus !== 'D' && (
                         <button
-                          onClick={() => updateOrderStatus(order.id, 'completed')}
-                          className="text-blue-600 hover:text-blue-900"
-                        >
-                          Complete
-                        </button>
-                      )}
-                      {['pending', 'preparing'].includes(order.status) && (
-                        <button
-                          onClick={() => updateOrderStatus(order.id, 'cancelled')}
+                          onClick={() => patchOrderStatus(order.id, 'C')}
                           className="text-red-600 hover:text-red-900 inline-flex items-center"
                         >
-                          <X className="h-4 w-4 mr-1" />
-                          Cancel
+                          Cancel (C)
                         </button>
                       )}
                     </td>
@@ -360,7 +313,7 @@ const OrderPage= () => {
                       </div>
                       <div>
                         <p className="text-sm text-gray-500">Order Time</p>
-                        <p className="font-medium">{formatTime(selectedOrder.orderTime)}</p>
+                        <p className="font-medium">{selectedOrder.createdAt ? formatTime(selectedOrder.createdAt) : ''}</p>
                       </div>
                       <div>
                         <p className="text-sm text-gray-500">Order Type</p>
@@ -381,16 +334,16 @@ const OrderPage= () => {
                     <div className="space-y-2">
                       <div className="flex items-center">
                         <User className="h-4 w-4 text-gray-400 mr-2" />
-                        <span>{selectedOrder.customerName}</span>
+                        <span>{selectedOrder.User?.name || 'N/A'}</span>
                       </div>
                       <div className="flex items-center">
                         <Phone className="h-4 w-4 text-gray-400 mr-2" />
-                        <span>{selectedOrder.customerPhone}</span>
+                        <span>{selectedOrder.phone || 'N/A'}</span>
                       </div>
                       {selectedOrder.orderType === 'delivery' && (
                         <div className="flex items-start">
                           <MapPin className="h-4 w-4 text-gray-400 mr-2 mt-0.5" />
-                          <span>{selectedOrder.customerAddress}</span>
+                          <span>{selectedOrder.address || 'N/A'}</span>
                         </div>
                       )}
                     </div>
@@ -400,7 +353,7 @@ const OrderPage= () => {
                   <div>
                     <h3 className="text-lg font-semibold mb-3">Order Items</h3>
                     <div className="space-y-3">
-                      {selectedOrder.items.map((item, index) => (
+                      {selectedOrder.OrderItems?.map((item, index) => (
                         <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                           <div>
                             <p className="font-medium">{item.name}</p>
@@ -424,44 +377,33 @@ const OrderPage= () => {
 
                   {/* Action Buttons */}
                   <div className="flex gap-3 pt-4 border-t border-gray-200">
-                    {selectedOrder.status === 'pending' && (
+                    {selectedOrder.orderStatus === 'P' && (
                       <button
                         onClick={() => {
-                          updateOrderStatus(selectedOrder.id, 'preparing');
+                          patchOrderStatus(selectedOrder.id, 'R');
                           setSelectedOrder(null);
                         }}
                         className="flex-1 bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 flex items-center justify-center"
                       >
-                        <Check className="h-4 w-4 mr-2" />
-                        Accept Order
+                        Ready (R)
                       </button>
                     )}
-                    {selectedOrder.status === 'preparing' && (
+                    {selectedOrder.orderStatus === 'R' && (
                       <button
                         onClick={() => {
-                          updateOrderStatus(selectedOrder.id, 'ready');
+                          patchOrderStatus(selectedOrder.id, 'D');
                           setSelectedOrder(null);
                         }}
                         className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700"
                       >
-                        Mark as Ready
+                        Delivered (D)
                       </button>
                     )}
-                    {selectedOrder.status === 'ready' && (
+                    {/* Show Cancel for all except already cancelled or delivered */}
+                    {selectedOrder.orderStatus !== 'C' && selectedOrder.orderStatus !== 'D' && (
                       <button
                         onClick={() => {
-                          updateOrderStatus(selectedOrder.id, 'completed');
-                          setSelectedOrder(null);
-                        }}
-                        className="flex-1 bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700"
-                      >
-                        Complete Order
-                      </button>
-                    )}
-                    {['pending', 'preparing'].includes(selectedOrder.status) && (
-                      <button
-                        onClick={() => {
-                          updateOrderStatus(selectedOrder.id, 'cancelled');
+                          patchOrderStatus(selectedOrder.id, 'C');
                           setSelectedOrder(null);
                         }}
                         className="px-6 py-2 border border-red-600 text-red-600 rounded-lg hover:bg-red-50"
