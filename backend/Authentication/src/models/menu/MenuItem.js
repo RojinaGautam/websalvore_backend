@@ -27,4 +27,8 @@ export const MenuItem = sequelize.define("MenuItem", {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  image: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
 }); 

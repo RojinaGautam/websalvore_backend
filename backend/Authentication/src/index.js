@@ -18,6 +18,10 @@ const app = express();
 const port = process.env.PORT || 5000;
 app.use(bodyParser.json());
 app.use(cors());
+
+// Serve uploads publicly
+app.use('/uploads', express.static('uploads'));
+
 app.use(authenticateToken);
 app.use("/api/users", userRouter);
 app.use("/api/auth", authRouter);

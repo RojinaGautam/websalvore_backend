@@ -13,6 +13,7 @@ const initialForm = {
   price: '',
   stock: '',
   status: 'Available',
+  image: null,
 };
 
 const MenuPage = () => {
@@ -27,6 +28,8 @@ const MenuPage = () => {
   const [fetchError, setFetchError] = useState('');
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [editId, setEditId] = useState(null);
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
 
   // Fetch menu items from backend
   const fetchMenuItems = async () => {
@@ -78,11 +81,24 @@ const MenuPage = () => {
       price: item.price,
       stock: item.stock,
       status: item.status,
+      image: null,
     });
+    setImageFile(null);
+    setImagePreview(item.image ? `http://localhost:4000/uploads/${item.image}` : null);
     setEditId(item.id);
     setShowModal(true);
     setError('');
     setSuccess('');
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    setImageFile(file);
+    if (file) {
+      setImagePreview(URL.createObjectURL(file));
+    } else {
+      setImagePreview(null);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -92,21 +108,22 @@ const MenuPage = () => {
     setSuccess('');
     try {
       const token = localStorage.getItem('token');
-      const payload = {
-        name: form.name,
-        category: form.category,
-        price: parseFloat(form.price),
-        stock: parseInt(form.stock, 10),
-        status: form.status,
-      };
-      console.log(editId ? 'Editing menu item:' : 'Submitting menu item:', payload);
+      const formData = new FormData();
+      formData.append('name', form.name);
+      formData.append('category', form.category);
+      formData.append('price', parseFloat(form.price));
+      formData.append('stock', parseInt(form.stock, 10));
+      formData.append('status', form.status);
+      if (imageFile) {
+        formData.append('image', imageFile);
+      }
+      console.log(editId ? 'Editing menu item:' : 'Submitting menu item:', formData);
       const res = await fetch(`http://localhost:4000/api/menu${editId ? `/${editId}` : ''}`, {
         method: editId ? 'PUT' : 'POST',
         headers: {
-          'Content-Type': 'application/json',
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify(payload),
+        body: formData,
       });
       let data = {};
       try {
@@ -122,6 +139,8 @@ const MenuPage = () => {
       }
       setShowModal(false);
       setForm(initialForm);
+      setImageFile(null);
+      setImagePreview(null);
       setEditId(null);
       setSuccess(data?.message || (editId ? 'Menu item updated successfully!' : 'Menu item added successfully!'));
       setTimeout(() => setSuccess(''), 3000);
@@ -163,6 +182,7 @@ const MenuPage = () => {
       <table className="w-full">
         <thead className="bg-gray-50">
           <tr>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Image</th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Item Name</th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
@@ -174,6 +194,13 @@ const MenuPage = () => {
         <tbody className="divide-y divide-gray-200">
           {items.map((item) => (
             <tr key={item.id} className="hover:bg-gray-50">
+              <td className="px-6 py-4 whitespace-nowrap">
+                {item.image ? (
+                  <img src={`http://localhost:4000/uploads/${item.image}`} alt={item.name} className="w-12 h-12 object-cover rounded" />
+                ) : (
+                  <span className="text-gray-400">No Image</span>
+                )}
+              </td>
               <td className="px-6 py-4 whitespace-nowrap font-medium">{item.name}</td>
               <td className="px-6 py-4 whitespace-nowrap">{item.category}</td>
               <td className="px-6 py-4 whitespace-nowrap">${item.price}</td>
@@ -231,12 +258,12 @@ const MenuPage = () => {
       </div>
       {/* Modal for Add Item */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto">
           {/* Backdrop with blur */}
           <div className="absolute inset-0 bg-black bg-opacity-20 backdrop-blur-sm transition-all duration-300" />
           {/* Modal */}
           <div className="relative z-10 animate-pop-in">
-            <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-lg p-8 border border-gray-200 min-w-[320px] min-h-[200px]">
+            <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-lg p-8 border border-gray-200 min-w-[320px] min-h-[200px] max-h-[90vh] overflow-y-auto">
               <button
                 className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 text-2xl font-bold"
                 onClick={() => { setShowModal(false); setError(''); setSuccess(''); setEditId(null); }}
@@ -276,6 +303,15 @@ const MenuPage = () => {
                   <option value="Low Stock">Low Stock</option>
                   <option value="Out of Stock">Out of Stock</option>
                 </select>
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Image</label>
+                <div className="flex flex-row items-center gap-4">
+                  <input type="file" accept="image/*" onChange={handleImageChange} className="w-full max-w-xs" />
+                  {imagePreview && (
+                    <img src={imagePreview} alt="Preview" className="rounded w-12 h-12 object-cover" />
+                  )}
+                </div>
               </div>
               <div className="flex justify-end">
                 <button
