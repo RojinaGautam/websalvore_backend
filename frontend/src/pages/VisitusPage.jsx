@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Aaron from "../assets/Aaron.png";
 import Drew from "../assets/Drew.png";
 import Rufus from "../assets/Rufus.png";
@@ -38,25 +38,44 @@ const chefs = [
 
 const filterOptions = ["Team and Management", "Testimonial", "Contact"];
 
-const testimonials = [
-  {
-    name: "Daniel Gallego",
-    image: blackgirl,
-    text: "THE SEAFOOD PLATTER WAS ABSOLUTELY AMAZING—FRESH, FLAVORFUL, AND BEAUTIFULLY SERVED. A MUST-TRY!",
-    stars: 5,
-    color: "text-orange-600"
-  },
-  {
-    name: "Olivia Wilson",
-    image: whitegirl,
-    text: "I COME HERE OFTEN BECAUSE THE FOOD IS CONSISTENTLY GREAT AND THE ATMOSPHERE IS SO WELCOMING.",
-    stars: 5,
-    color: "text-orange-600"
-  }
-];
-
 const VisitusPage = () => {
   const [filter, setFilter] = useState(filterOptions[0]);
+  const [contactInfo, setContactInfo] = useState({
+    phone: '',
+    address: '',
+    website: ''
+  });
+  const [testimonials, setTestimonials] = useState([]);
+
+  useEffect(() => {
+    // Fetch settings for contact info
+    fetch('http://localhost:4000/api/settings', {
+      headers: { 'Content-Type': 'application/json' }
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.data) {
+          setContactInfo({
+            phone: data.data.phone || '',
+            address: data.data.address || '',
+            website: data.data.website || ''
+          });
+        }
+      });
+  }, []);
+
+  useEffect(() => {
+    // Fetch testimonials from backend
+    fetch('http://localhost:4000/api/testimonials', {
+      headers: { 'Content-Type': 'application/json' }
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.data) {
+          setTestimonials(data.data);
+        }
+      });
+  }, []);
 
   return (
     <main className="relative min-h-screen text-white overflow-hidden">
@@ -134,27 +153,33 @@ const VisitusPage = () => {
             <div className="md:w-1/2 flex flex-col justify-center pl-0 md:pl-12">
               <h1 className="text-5xl md:text-6xl font-extrabold mb-8">Our Client Say!!!</h1>
               <div className="flex flex-col gap-8">
-                {testimonials.map((t, idx) => (
-                  <div key={t.name} className="flex items-start gap-4">
-                    <img
-                      src={t.image}
-                      alt={t.name}
-                      className="rounded-lg object-cover w-20 h-20"
-                    />
-                    <div>
-                      <div className={`font-bold text-lg ${t.color}`}>{t.name}{" "}
-                        <span className="inline-block align-middle">
-                          {Array.from({ length: t.stars }).map((_, i) => (
-                            <span key={i} className="text-yellow-400 text-xl">&#9733;</span>
-                          ))}
-                        </span>
-                      </div>
-                      <div className="text-white font-semibold text-sm mt-1">
-                        “{t.text}”
+                {testimonials.length === 0 ? (
+                  <div className="text-white">No testimonials found.</div>
+                ) : (
+                  testimonials.map((t, idx) => (
+                    <div key={t.id || idx} className="flex items-start gap-4">
+                      <img
+                        src={idx % 2 === 0 ? blackgirl : whitegirl}
+                        alt={t.name}
+                        className="rounded-lg object-cover w-20 h-20"
+                      />
+                      <div>
+                        <div className={`font-bold text-lg text-orange-600`}>
+                          {t.name} {t.rating && (
+                            <span className="inline-block align-middle">
+                              {Array.from({ length: t.rating }).map((_, i) => (
+                                <span key={i} className="text-yellow-400 text-xl">&#9733;</span>
+                              ))}
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-white font-semibold text-sm mt-1">
+                          “{t.message}”
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </div>
           </div>
@@ -169,9 +194,9 @@ const VisitusPage = () => {
               <div className="mt-8">
                 <div className="text-red-500 text-xl font-bold mb-2">Contact Us :</div>
                 <div className="text-white text-lg leading-relaxed">
-                  +123-456-7890<br />
-                  @reallygreatsite<br />
-                  123 Anywhere St., Any City
+                  {contactInfo.phone && <>{contactInfo.phone}<br /></>}
+                  {contactInfo.website && <>{contactInfo.website}<br /></>}
+                  {contactInfo.address && <>{contactInfo.address}</>}
                 </div>
               </div>
             </div>

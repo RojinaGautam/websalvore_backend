@@ -52,7 +52,10 @@ export default function SignupPage() {
     const payload = {
       name,
       email: formData.email,
+      phone: formData.phoneNumber,
       password: formData.password,
+      role: 'user',
+      image: null
     };
     try {
       const res = await fetch("http://localhost:4000/api/users", {

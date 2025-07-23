@@ -1,8 +1,9 @@
 // src/pages/LoginPage.jsx
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import loginImage from "../assets/loginpage.png"; // Adjust path based on your project
 import { Link, useNavigate } from "react-router-dom";
 import backgroundImg from "../assets/background.jpg";
+import { AuthContext } from "../components/AuthContext";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -10,6 +11,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const { login } = useContext(AuthContext);
 
   // SVGs for eye open and eye closed
   const EyeOpen = (
@@ -41,22 +43,23 @@ export default function LoginPage() {
         setError(data.message || data.error || "Login failed");
         return;
       }
-      // Save token and user info, then redirect
-      localStorage.setItem("token", data.data.access_token);
-      // Decode the JWT to get user info (or use backend response if available)
+      // Save token and user info using context
       const payload = JSON.parse(atob(data.data.access_token.split('.')[1]));
       if (payload && payload.user) {
         const userObj = {
           id: payload.user.id,
           name: payload.user.name,
-          email: payload.user.email
+          email: payload.user.email,
+          role: payload.user.role
         };
-        localStorage.setItem("user", JSON.stringify(userObj));
-        console.log("User logged in successfully:", userObj);
-        console.log("Token:", data.data.access_token);
+        login(userObj, data.data.access_token); // Use AuthContext
+        if (userObj.role === "admin") {
+          navigate("/admin", { replace: true });
+        } else {
+          navigate("/", { replace: true });
+        }
+        return;
       }
-      navigate("/", { replace: true });
-      window.location.reload();
     } catch (err) {
       setError("Network error. Please try again.");
     }

@@ -1,20 +1,29 @@
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import React, { useContext } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   TrendingUp, ShoppingCart, Utensils, Users, BarChart, Settings, LogOut
 } from 'lucide-react';
+import { AuthContext } from '../src/components/AuthContext';
 
 const sidebarItems = [
   { id: 'overview', label: 'Overview', icon: TrendingUp, to: '/admin' },
-  { id: 'orders', label: 'Orders', icon: ShoppingCart, to: '/admin/orders' }, // Added Orders
+  { id: 'orders', label: 'Orders', icon: ShoppingCart, to: '/admin/orders' }, 
   { id: 'menu', label: 'Menu Management', icon: Utensils, to: '/admin/menu' },
   { id: 'team', label: 'Team & Management', icon: Users, to: '/admin/team' },
-  { id: 'settings', label: 'Settings', icon: Settings, to: '/admin/settings' }, // Added Settings
-  { id: 'contact', label: 'Contact', icon: BarChart, to: '/admin/contact' },   // Added Contact (using BarChart as placeholder)
+  { id: 'settings', label: 'Settings', icon: Settings, to: '/admin/settings' }, 
+  { id: 'contact', label: 'Contact', icon: BarChart, to: '/admin/contact' },  
 ];
 
 const Sidebar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { logout } = useContext(AuthContext);
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login', { replace: true });
+  };
+
   return (
     <div className="w-64 h-full shadow-lg" style={{ backgroundColor: '#D13B24' }}>
       <div className="p-6 border-b">
@@ -39,7 +48,7 @@ const Sidebar = () => {
       </nav>
       <button
         className="w-full flex items-center px-6 py-3 text-left text-red-600 hover:bg-red-50 transition-colors rounded-lg mt-auto mb-6"
-        // onClick={handleLogout} // Add your logout logic here
+        onClick={handleLogout}
       >
         <LogOut className="w-5 h-5 mr-3 text-white" />
         <span className="font-bold text-white">Logout</span>

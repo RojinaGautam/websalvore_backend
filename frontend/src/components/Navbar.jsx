@@ -2,17 +2,17 @@ import { UserIcon } from "@heroicons/react/24/solid";
 import logo from "../assets/logo.png"; // Adjust path based on your folder structure
 import { Link } from "react-router-dom";
 import { ShoppingCart, Star } from "lucide-react"; // <-- Add Star icon
-import { useState } from "react";
+import { useContext, useState } from "react";
+import { AuthContext } from "./AuthContext";
 
 export default function Navbar() {
   const [showDropdown, setShowDropdown] = useState(false);
-  const user = JSON.parse(localStorage.getItem("user"));
+  const { user, logout } = useContext(AuthContext);
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    logout();
     setShowDropdown(false);
-    window.location.reload(); // or use navigate if you want to redirect
+    // No reload needed
   };
 
   const getInitials = (name) => {

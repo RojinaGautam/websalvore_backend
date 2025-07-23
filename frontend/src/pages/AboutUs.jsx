@@ -1,10 +1,37 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import aboutseabig from "../assets/aboutseabig.png";
 import aboutsea from "../assets/aboutsea.png";
 import aboutgirl from "../assets/aboutgirl.png";
 import backgroundImg from "../assets/background.jpg"; 
 
 const AboutUs = () => {
+  const [restaurantName, setRestaurantName] = useState("Salvore Restaurant");
+  const [description, setDescription] = useState("");
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const res = await fetch("http://localhost:4000/api/settings", {
+          headers: {
+            "Content-Type": "application/json"
+          }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.data && data.data.restaurantName) {
+            setRestaurantName(data.data.restaurantName);
+          }
+          if (data.data && data.data.description) {
+            setDescription(data.data.description);
+          }
+        }
+      } catch (e) {
+        // fallback to default
+      }
+    };
+    fetchSettings();
+  }, []);
+
   return (
     <main className="relative min-h-screen text-white overflow-hidden">
       {/* Background Image */}
@@ -29,20 +56,11 @@ const AboutUs = () => {
         {/* Right Text and Stacked Images */}
         <div className="md:w-1/2 flex flex-col justify-center">
           <h2 className="text-yellow-400 text-2xl md:text-3xl font-bold mb-4">
-            Welcome to Salvore Restaurant — Savor the Sea.
+            Welcome to {restaurantName} — Savor the Sea.
           </h2>
-          <p className="text-gray-200 mb-4">
-            At Salvore, we bring the ocean's finest treasures to your table with
-            passion, precision, and a touch of modern elegance. Inspired by the
-            sea and crafted for the senses, our seafood-driven menu blends
-            global flavors with locally sourced ingredients, delivering
-            freshness in every bite.
-          </p>
-          <p className="text-gray-200 mb-4">
-            Whether you're savoring our signature grilled fish, indulging in
-            buttery lobster, or discovering new favorites from the deep, every
-            dish is a tribute to the ocean’s bounty.
-          </p>
+          {description && description.split(/\n\n/).map((para, idx) => (
+            <p key={idx} className="text-gray-200 mb-4">{para}</p>
+          ))}
           <p className="text-yellow-300 font-semibold">
             Come dine with us. Savor the Sea.
           </p>

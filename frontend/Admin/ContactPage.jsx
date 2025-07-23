@@ -24,6 +24,30 @@ import {
 const ContactPage = () => {
   const [inquiries, setInquiries] = useState([]);
   const [fetchError, setFetchError] = useState('');
+  const [contactInfo, setContactInfo] = useState({
+    phone: '',
+    email: '',
+    address: '',
+    website: ''
+  });
+
+  useEffect(() => {
+    // Fetch settings for contact info
+    fetch('http://localhost:4000/api/settings', {
+      headers: { 'Content-Type': 'application/json' }
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.data) {
+          setContactInfo({
+            phone: data.data.phone || '',
+            email: data.data.email || '',
+            address: data.data.address || '',
+            website: data.data.website || ''
+          });
+        }
+      });
+  }, []);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -109,21 +133,21 @@ const ContactPage = () => {
               <Phone className="h-5 w-5 text-gray-400 mr-3" />
               <div>
                 <p className="font-medium text-gray-900">Phone</p>
-                <p className="text-gray-600">+1 (555) 123-4567</p>
+                <p className="text-gray-600">{contactInfo.phone}</p>
               </div>
             </div>
             <div className="flex items-center">
               <Mail className="h-5 w-5 text-gray-400 mr-3" />
               <div>
                 <p className="font-medium text-gray-900">Email</p>
-                <p className="text-gray-600">info@restaurant.com</p>
+                <p className="text-gray-600">{contactInfo.email}</p>
               </div>
             </div>
             <div className="flex items-center">
               <MapPin className="h-5 w-5 text-gray-400 mr-3" />
               <div>
                 <p className="font-medium text-gray-900">Address</p>
-                <p className="text-gray-600">123 Food Street, City, State 12345</p>
+                <p className="text-gray-600">{contactInfo.address}</p>
               </div>
             </div>
           </div>
@@ -139,7 +163,7 @@ const ContactPage = () => {
               <Globe className="h-5 w-5 text-gray-400 mr-3" />
               <div>
                 <p className="font-medium text-gray-900">Website</p>
-                <p className="text-gray-600">www.restaurant.com</p>
+                <p className="text-gray-600">{contactInfo.website}</p>
               </div>
             </div>
           </div>
