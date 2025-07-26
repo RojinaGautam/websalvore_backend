@@ -12,6 +12,8 @@ import { testimonialRouter } from "./route/index.js";
 import { menuRouter } from "./route/index.js";
 import orderRouter from "./route/orderRoute.js";
 import settingRoute from "./route/settingRoute.js";
+import { reservationRouter } from "./route/index.js";
+
 
 dotenv.config();
 
@@ -32,6 +34,7 @@ app.use("/api/testimonials", testimonialRouter);
 app.use("/api/menu", menuRouter);
 app.use("/api/orders", orderRouter);
 app.use("/api/settings", settingRoute);
+app.use("/api/reservations", reservationRouter);
 createUploadsFolder();
 app.listen(4000, function () {
   console.log("project running in port ", port);

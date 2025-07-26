@@ -7,7 +7,7 @@ import TeamPage from './TeamPage';
 import SettingPage from './SettingPage';
 import ContactPage from './ContactPage';
 import OrderPage from './OrderPage';
-
+import ReservationPage from './ReservationPage';
 
 
 
@@ -20,6 +20,7 @@ const AdminDashboard = () => (
       <Route path="settings" element={<SettingPage />} />
       <Route path="contact" element={<ContactPage />} />
       <Route path="orders" element={<OrderPage />} />
+      <Route path="reservations" element={<ReservationPage />} />
       {/* Add more admin subpages here as needed */}
     </Routes>
   </AdminLayout>

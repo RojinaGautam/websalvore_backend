@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Filter, Eye, Check, X, Clock, DollarSign, User, MapPin, Phone } from 'lucide-react';
+import backgroundImg from "../src/assets/background.jpg";
 
 const OrderPage = () => {
   const [orders, setOrders] = useState([]);
@@ -81,8 +82,19 @@ const OrderPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
+    <div className="relative min-h-screen">
+      {/* Background Image */}
+      {/* 
+      <img
+        src={backgroundImg}
+        alt="Background"
+        className="absolute inset-0 w-full h-full object-cover z-0"
+        style={{ filter: 'blur(4px)' }}
+      />
+      <div className="absolute inset-0 bg-black/70 z-0" />
+      */}
+      {/* Main Content */}
+      <div className="relative z-10 p-6 max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Order Management</h1>

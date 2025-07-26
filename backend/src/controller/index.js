@@ -4,3 +4,4 @@ export * from './testimonials/testimonialController.js'
 export * from './menu/menuController.js'
 export * from "./order/orderController.js";
 export * from './settingController.js';
+export * from './reservationController.js'

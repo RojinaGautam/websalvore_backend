@@ -33,6 +33,9 @@ const Reservation = () => {
     phone: '',
     specialRequests: ''
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
 
   // Mock available time slots
   const timeSlots = [
@@ -86,10 +89,29 @@ const Reservation = () => {
            reservationData.phone;
   };
 
-  const handleSubmitReservation = (e) => {
+  const handleSubmitReservation = async (e) => {
     e.preventDefault();
-    if (isFormValid()) {
-      setCurrentStep('confirmation');
+    if (!isFormValid()) return;
+    setLoading(true);
+    setError('');
+    setSuccess(false);
+    try {
+      const res = await fetch('http://localhost:4000/api/reservations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(reservationData)
+      });
+      const data = await res.json();
+      if (res.ok && data.data) {
+        setSuccess(true);
+        setCurrentStep('confirmation');
+      } else {
+        setError(data.error || 'Failed to make reservation');
+      }
+    } catch (err) {
+      setError('Failed to make reservation');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -118,15 +140,14 @@ const Reservation = () => {
       <div className="bg-white rounded-lg shadow-sm border p-6">
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            {/* {editingReservation ? 'Modify Reservation' : 'Make a Reservation'} */}
             Make a Reservation
           </h2>
           <p className="text-gray-600">
-            {/* {editingReservation ? 'Update your reservation details' : 'Reserve your table at Bella Vista Restaurant'} */}
-            Reserve your table at Bella Vista Restaurant
+            Reserve your table at Salvore Restaurant
           </p>
         </div>
-
+        {error && <div className="text-red-600 mb-4">{error}</div>}
+        {loading && <div className="text-blue-600 mb-4">Loading...</div>}
         <div className="space-y-6">
           {/* Date and Time Selection */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -269,7 +290,7 @@ const Reservation = () => {
             <button
               type="button"
               onClick={handleSubmitReservation}
-              disabled={!isFormValid()}
+              disabled={!isFormValid() || loading}
               style={{ backgroundColor: '#cb3d27' }}
               className="flex items-center gap-2 px-6 py-3 text-white rounded-lg hover:brightness-90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors ml-auto"
             >

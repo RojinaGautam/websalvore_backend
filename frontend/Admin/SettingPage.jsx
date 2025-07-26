@@ -30,7 +30,6 @@ const SettingPage = () => {
     // Default values (will be replaced by backend fetch)
     restaurantName: '',
     description: '',
-    cuisine: '',
     phone: '',
     email: '',
     website: '',
@@ -128,8 +127,7 @@ const SettingPage = () => {
   };
 
   const tabs = [
-    { id: 'general', label: 'General Info', icon: Store },
-    { id: 'tables', label: 'Table Management', icon: Utensils }
+    { id: 'general', label: 'General Info', icon: Store }
   ];
 
   const renderGeneralSettings = () => (
@@ -143,22 +141,6 @@ const SettingPage = () => {
             onChange={(e) => handleDirectChange('restaurantName', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Cuisine Type</label>
-          <select
-            value={settings.cuisine}
-            onChange={(e) => handleDirectChange('cuisine', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          >
-            <option value="Italian">Italian</option>
-            <option value="Chinese">Chinese</option>
-            <option value="Mexican">Mexican</option>
-            <option value="Indian">Indian</option>
-            <option value="American">American</option>
-            <option value="Japanese">Japanese</option>
-            <option value="Mediterranean">Mediterranean</option>
-          </select>
         </div>
       </div>
 
@@ -291,11 +273,7 @@ const SettingPage = () => {
   );
 
   const renderTabContent = () => {
-    switch (activeTab) {
-      case 'general': return renderGeneralSettings();
-      case 'tables': return renderTableSettings();
-      default: return renderGeneralSettings();
-    }
+    return renderGeneralSettings();
   };
 
   return (

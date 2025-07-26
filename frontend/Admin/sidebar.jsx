@@ -1,7 +1,8 @@
 import React, { useContext } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
-  TrendingUp, ShoppingCart, Utensils, Users, BarChart, Settings, LogOut
+  TrendingUp, ShoppingCart, Utensils, Users, BarChart, Settings, LogOut,
+  Calendar
 } from 'lucide-react';
 import { AuthContext } from '../src/components/AuthContext';
 
@@ -10,6 +11,7 @@ const sidebarItems = [
   { id: 'orders', label: 'Orders', icon: ShoppingCart, to: '/admin/orders' }, 
   { id: 'menu', label: 'Menu Management', icon: Utensils, to: '/admin/menu' },
   { id: 'team', label: 'Team & Management', icon: Users, to: '/admin/team' },
+  { id: 'reservation', label: 'Reservation', icon: Calendar, to: '/admin/reservations' },
   { id: 'settings', label: 'Settings', icon: Settings, to: '/admin/settings' }, 
   { id: 'contact', label: 'Contact', icon: BarChart, to: '/admin/contact' },  
 ];
@@ -25,9 +27,9 @@ const Sidebar = () => {
   };
 
   return (
-    <div className="w-64 h-full shadow-lg" style={{ backgroundColor: '#D13B24' }}>
+    <div className="w-64 h-full shadow-lg bg-white">
       <div className="p-6 border-b">
-        <h1 className="text-xl font-bold text-white">Restaurant Admin</h1>
+        <h1 className="text-xl font-bold text-gray-800">Restaurant Admin</h1>
       </div>
       <nav className="mt-6">
         {sidebarItems.map((item) => {
@@ -40,8 +42,8 @@ const Sidebar = () => {
                 isActive ? 'bg-yellow-400 text-yellow-900 border-r-2 border-yellow-400' : 'text-gray-700 hover:bg-gray-50'
               }`}
             >
-              <item.icon className={`w-5 h-5 mr-3 font-bold ${isActive ? 'text-yellow-900' : 'text-white'}`} />
-              <span className={`font-bold ${isActive ? 'text-yellow-900' : 'text-white'}`}>{item.label}</span>
+              <item.icon className={`w-5 h-5 mr-3 font-bold ${isActive ? 'text-yellow-900' : 'text-gray-800'}`} />
+              <span className={`font-bold ${isActive ? 'text-yellow-900' : 'text-gray-800'}`}>{item.label}</span>
             </Link>
           );
         })}
@@ -50,8 +52,8 @@ const Sidebar = () => {
         className="w-full flex items-center px-6 py-3 text-left text-red-600 hover:bg-red-50 transition-colors rounded-lg mt-auto mb-6"
         onClick={handleLogout}
       >
-        <LogOut className="w-5 h-5 mr-3 text-white" />
-        <span className="font-bold text-white">Logout</span>
+        <LogOut className="w-5 h-5 mr-3 text-red-600" />
+        <span className="font-bold text-red-600">Logout</span>
       </button>
     </div>
   );

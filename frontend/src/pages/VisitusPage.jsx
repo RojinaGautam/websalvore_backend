@@ -38,6 +38,13 @@ const chefs = [
 
 const filterOptions = ["Team and Management", "Testimonial", "Contact"];
 
+const staffImages = [Aaron, Drew, Ndemi, Rufus];
+
+function getRandomImage(idx) {
+  // Use index to keep image stable per render
+  return staffImages[idx % staffImages.length];
+}
+
 const VisitusPage = () => {
   const [filter, setFilter] = useState(filterOptions[0]);
   const [contactInfo, setContactInfo] = useState({
@@ -46,6 +53,7 @@ const VisitusPage = () => {
     website: ''
   });
   const [testimonials, setTestimonials] = useState([]);
+  const [admins, setAdmins] = useState([]);
 
   useEffect(() => {
     // Fetch settings for contact info
@@ -73,6 +81,19 @@ const VisitusPage = () => {
       .then(data => {
         if (data.data) {
           setTestimonials(data.data);
+        }
+      });
+  }, []);
+
+  useEffect(() => {
+    // Fetch admin users from backend
+    fetch('http://localhost:4000/api/users', {
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.data) {
+          setAdmins(data.data.filter(u => u.role === 'admin'));
         }
       });
   }, []);
@@ -110,26 +131,31 @@ const VisitusPage = () => {
           <div className="bg-[#d44d32] rounded-3xl p-8">
             <h1 className="text-6xl font-extrabold text-center mb-8">Team and Management</h1>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-              {chefs.map((chef) => (
-                <div key={chef.name} className="flex flex-col items-center">
-                  <img
-                    src={chef.image}
-                    alt={chef.name}
-                    className="rounded-lg object-cover h-56 w-full mb-4"
-                    style={{ maxWidth: "250px" }}
-                  />
-                  <div className="font-bold text-lg text-white text-center">{chef.name}</div>
-                </div>
-              ))}
+              {admins.length === 0 ? (
+                <div className="col-span-4 text-center text-white text-lg">No staff/admins found.</div>
+              ) : (
+                admins.map((admin, idx) => (
+                  <div key={admin.id} className="flex flex-col items-center">
+                    <img
+                      src={getRandomImage(idx)}
+                      alt={admin.name}
+                      className="rounded-lg object-cover h-56 w-full mb-4"
+                      style={{ maxWidth: "250px" }}
+                    />
+                    <div className="font-bold text-lg text-white text-center">{admin.name}</div>
+                    <div className="text-white text-sm text-center">{admin.position}</div>
+                  </div>
+                ))
+              )}
             </div>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-              {chefs.map((chef) => (
-                <div key={chef.title} className="text-center">
+              {admins.length === 0 ? null : admins.map((admin) => (
+                <div key={admin.id + '-desc'} className="text-center">
                   <div className="font-bold text-yellow-300 mb-2" style={{ letterSpacing: "1px" }}>
-                    {chef.title}
+                    {admin.department || 'Management'}
                   </div>
                   <div className="text-white font-semibold text-xs" style={{ letterSpacing: "0.5px" }}>
-                    {chef.description}
+                    {admin.email}<br/>{admin.phone}
                   </div>
                 </div>
               ))}

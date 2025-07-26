@@ -32,7 +32,14 @@ const create = async (req, res) => {
             phone: body.phone,
             role: body.role,
             image: body.image || null,
-            password: body.password
+            password: body.password,
+            position: body.position || null,
+            department: body.department || null,
+            hireDate: body.hireDate || null,
+            salary: body.salary || null,
+            status: body.status || 'active',
+            performance: body.performance || null,
+            avatar: body.avatar || null
         });
         res.status(201).send({ data: users, message: "successfully created user" })
     } catch (e) {
@@ -62,6 +69,13 @@ const update = async (req, res) => {
         oldUser.phone = body.phone || oldUser.phone;
         oldUser.role = body.role || oldUser.role;
         oldUser.image = body.image || oldUser.image;
+        oldUser.position = body.position || oldUser.position;
+        oldUser.department = body.department || oldUser.department;
+        oldUser.hireDate = body.hireDate || oldUser.hireDate;
+        oldUser.salary = body.salary || oldUser.salary;
+        oldUser.status = body.status || oldUser.status;
+        oldUser.performance = body.performance || oldUser.performance;
+        oldUser.avatar = body.avatar || oldUser.avatar;
         oldUser.save();
         res.status(201).send({ data: oldUser, message: "user updated successfully" })
     } catch (e) {

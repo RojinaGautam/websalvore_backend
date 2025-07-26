@@ -30,5 +30,34 @@ export const User=sequelize.define("User",{
       },
       password:{
         type:DataTypes.STRING
-      }
+      },
+      position: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      department: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      hireDate: {
+        type: DataTypes.DATEONLY,
+        allowNull: true,
+      },
+      salary: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+      },
+      status: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        defaultValue: 'active',
+      },
+      performance: {
+        type: DataTypes.FLOAT,
+        allowNull: true,
+      },
+      avatar: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
 })
