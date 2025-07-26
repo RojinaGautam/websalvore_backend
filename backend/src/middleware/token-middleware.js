@@ -7,7 +7,11 @@ export function authenticateToken(req, res, next) {
   // Allow all GET requests to bypass token authentication
   if (
     req.method === "GET" ||
-    (req.method === "POST" && (req.path === "/api/auth/login" || req.path === "/api/users"))
+    (req.method === "POST" && (
+      req.path === "/api/auth/login" || 
+      req.path === "/api/users" ||
+      req.path === "/api/users/forgot-password"
+    ))
   ) {
     return next();
   }

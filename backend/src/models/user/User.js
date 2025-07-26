@@ -60,4 +60,9 @@ export const User=sequelize.define("User",{
         type: DataTypes.STRING,
         allowNull: true,
       },
+      isForgotten: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+      },
 })

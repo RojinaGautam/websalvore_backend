@@ -14,6 +14,74 @@ const getAll = async (req, res) => {
     }
 }
 
+/**
+ *  fetch forgotten users
+ */
+const getForgottenUsers = async (req, res) => {
+    try {
+        const users = await User.findAll({ where: { isForgotten: true } });
+        res.status(200).send({ data: users, message: "successfully fetched forgotten users" })
+    } catch (e) {
+        res.status(500).json({ error: 'Failed to fetch forgotten users' });
+    }
+}
+
+/**
+ *  request forgot password
+ */
+const requestForgotPassword = async (req, res) => {
+    try {
+        const { email } = req.body;
+        
+        if (!email) {
+            return res.status(400).send({ message: "Email is required" });
+        }
+
+        const user = await User.findOne({ where: { email } });
+        if (!user) {
+            return res.status(404).send({ message: "User not found" });
+        }
+
+        // Set isForgotten to true
+        user.isForgotten = true;
+        await user.save();
+
+        res.status(200).send({ message: "Forgot password request submitted successfully. Admin will contact you soon." });
+    } catch (e) {
+        console.log(e);
+        res.status(500).json({ error: 'Failed to process forgot password request' });
+    }
+}
+
+/**
+ *  reset password by admin
+ */
+const resetPassword = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { newPassword } = req.body;
+
+        if (!newPassword) {
+            return res.status(400).send({ message: "New password is required" });
+        }
+
+        const user = await User.findOne({ where: { id } });
+        if (!user) {
+            return res.status(404).send({ message: "User not found" });
+        }
+
+        // Update password and reset isForgotten
+        user.password = newPassword;
+        user.isForgotten = false;
+        await user.save();
+
+        res.status(200).send({ message: "Password reset successfully" });
+    } catch (e) {
+        console.log(e);
+        res.status(500).json({ error: 'Failed to reset password' });
+    }
+}
+
 /** 
  *  create new user
 */
@@ -39,7 +107,8 @@ const create = async (req, res) => {
             salary: body.salary || null,
             status: body.status || 'active',
             performance: body.performance || null,
-            avatar: body.avatar || null
+            avatar: body.avatar || null,
+            isForgotten: false
         });
         res.status(201).send({ data: users, message: "successfully created user" })
     } catch (e) {
@@ -76,6 +145,7 @@ const update = async (req, res) => {
         oldUser.status = body.status || oldUser.status;
         oldUser.performance = body.performance || oldUser.performance;
         oldUser.avatar = body.avatar || oldUser.avatar;
+        oldUser.isForgotten = body.isForgotten !== undefined ? body.isForgotten : oldUser.isForgotten;
         oldUser.save();
         res.status(201).send({ data: oldUser, message: "user updated successfully" })
     } catch (e) {
@@ -127,5 +197,8 @@ export const userController = {
     create,
     getById,
     delelteById,
-    update
+    update,
+    getForgottenUsers,
+    requestForgotPassword,
+    resetPassword
 }

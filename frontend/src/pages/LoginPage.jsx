@@ -10,6 +10,9 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [showForgotModal, setShowForgotModal] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotMessage, setForgotMessage] = useState("");
   const navigate = useNavigate();
   const { login } = useContext(AuthContext);
 
@@ -62,6 +65,31 @@ export default function LoginPage() {
       }
     } catch (err) {
       setError("Network error. Please try again.");
+    }
+  };
+
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    setForgotMessage("");
+    try {
+      const res = await fetch("http://localhost:4000/api/users/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: forgotEmail }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setForgotMessage(data.message);
+        setTimeout(() => {
+          setShowForgotModal(false);
+          setForgotEmail("");
+          setForgotMessage("");
+        }, 3000);
+      } else {
+        setForgotMessage(data.message || "Failed to submit request");
+      }
+    } catch (err) {
+      setForgotMessage("Network error. Please try again.");
     }
   };
 
@@ -133,9 +161,13 @@ export default function LoginPage() {
                 </button>
               </div>
               <div className="text-right mt-1">
-                <a href="#" className="text-orange-400 text-sm">
+                <button
+                  type="button"
+                  onClick={() => setShowForgotModal(true)}
+                  className="text-orange-400 text-sm hover:underline"
+                >
                   Forgot password?
-                </a>
+                </button>
               </div>
             </div>
             {error && <div className="text-red-400 text-center">{error}</div>}
@@ -148,6 +180,70 @@ export default function LoginPage() {
           </form>
         </div>
       </div>
+
+      {/* Forgot Password Modal */}
+      {showForgotModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-[#ca3d2a] rounded-lg p-8 w-full max-w-md shadow-lg">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-white">Forgot Password</h2>
+              <button
+                onClick={() => {
+                  setShowForgotModal(false);
+                  setForgotEmail("");
+                  setForgotMessage("");
+                }}
+                className="text-white hover:text-gray-200 text-2xl"
+              >
+                ×
+              </button>
+            </div>
+            <form onSubmit={handleForgotPassword}>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-white mb-2">
+                  Enter your email address
+                </label>
+                <input
+                  type="email"
+                  value={forgotEmail}
+                  onChange={(e) => setForgotEmail(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="your@email.com"
+                  required
+                />
+              </div>
+              {forgotMessage && (
+                <div className={`mb-4 p-3 rounded-lg text-sm ${
+                  forgotMessage.includes("successfully") 
+                    ? "bg-green-100 text-green-700" 
+                    : "bg-red-100 text-red-700"
+                }`}>
+                  {forgotMessage}
+                </div>
+              )}
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowForgotModal(false);
+                    setForgotEmail("");
+                    setForgotMessage("");
+                  }}
+                  className="flex-1 px-4 py-2 border border-white text-white rounded-lg hover:bg-white hover:text-[#ca3d2a] transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-4 py-2 bg-white text-[#ca3d2a] rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  Submit Request
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

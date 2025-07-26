@@ -1,5 +1,5 @@
 import express from "express";
-import { createOrder, getOrders, getOrderById, updateOrderStatus } from "../controller/order/orderController.js";
+import { createOrder, getOrders, getOrderById, updateOrderStatus, getDashboardStats } from "../controller/order/orderController.js";
 
 const router = express.Router();
 
@@ -8,6 +8,9 @@ router.post("/", createOrder);
 
 // Get all orders
 router.get("/", getOrders);
+
+// Get dashboard statistics (must come before :id route)
+router.get("/dashboard/stats", getDashboardStats);
 
 // Get order by ID
 router.get("/:id", getOrderById);
