@@ -12,6 +12,8 @@ export const MenuItem = sequelize.define("MenuItem", {
     allowNull: false,
   },
   category: {
+
+    
     type: DataTypes.STRING,
     allowNull: false,
   },
