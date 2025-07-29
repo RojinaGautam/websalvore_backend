@@ -12,8 +12,16 @@ const mockRes = () => {
 };
 
 describe('menuController', () => {
+  beforeEach(() => {
+    // Mock console.error to prevent output during tests
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
   afterEach(() => {
     jest.clearAllMocks();
+    if (console.error.mockRestore) {
+      console.error.mockRestore();
+    }
   });
 
   describe('getAll', () => {

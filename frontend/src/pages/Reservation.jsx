@@ -96,9 +96,13 @@ const Reservation = () => {
     setError('');
     setSuccess(false);
     try {
+      const token = localStorage.getItem('token');
       const res = await fetch('http://localhost:4000/api/reservations', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': token ? `Bearer ${token}` : ''
+        },
         body: JSON.stringify(reservationData)
       });
       const data = await res.json();
@@ -353,7 +357,7 @@ const Reservation = () => {
           <div className="flex items-start gap-3">
             <MapPin className="w-5 h-5 text-blue-600 mt-0.5" />
             <div className="text-left">
-              <p className="font-medium text-blue-900">Bella Vista Restaurant</p>
+              <p className="font-medium text-blue-900">Salvore Restaurant</p>
               <p className="text-sm text-blue-700">123 Main Street, Downtown, NY 10001</p>
               <p className="text-sm text-blue-700">Phone: (555) 123-4567</p>
             </div>

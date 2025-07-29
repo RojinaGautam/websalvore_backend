@@ -166,7 +166,17 @@ const MenuPage = () => {
         },
       });
       const data = await res.json();
+      
+      if (res.status === 409) {
+        // Handle foreign key constraint error
+        setError(data?.error || 'Cannot delete menu item. It is currently being used in orders.');
+        // Clear error after 10 seconds
+        setTimeout(() => setError(''), 10000);
+        return;
+      }
+      
       if (!res.ok) throw new Error(data?.error || data?.message || 'Failed to delete menu item');
+      
       setSuccess(data?.message || 'Menu item deleted successfully!');
       setTimeout(() => setSuccess(''), 3000);
       fetchMenuItems();
@@ -246,6 +256,12 @@ const MenuPage = () => {
       {/* Success message at the top of the page */}
       {success && (
         <div className="text-green-600 text-center font-semibold py-2">{success}</div>
+      )}
+      {/* Error message at the top of the page */}
+      {error && (
+        <div className="text-red-600 text-center font-semibold py-2 bg-red-50 border border-red-200 rounded-md mx-4 mt-4">
+          {error}
+        </div>
       )}
       {/* Add Item button at the top-right */}
       <div className="flex justify-end p-6">

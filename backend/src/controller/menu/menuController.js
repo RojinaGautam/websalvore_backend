@@ -36,8 +36,15 @@ const create = async (req, res) => {
 const update = async (req, res) => {
   try {
     const { id = null } = req.params;
+    
+    // Convert id to integer and validate
+    const menuId = parseInt(id);
+    if (isNaN(menuId)) {
+      return res.status(400).send({ message: "Invalid menu item ID" });
+    }
+    
     const body = req.body;
-    const item = await MenuItem.findOne({ where: { id } });
+    const item = await MenuItem.findOne({ where: { id: menuId } });
     if (!item) {
       return res.status(404).send({ message: "Menu item not found" });
     }
@@ -54,6 +61,7 @@ const update = async (req, res) => {
     await item.save();
     res.status(200).send({ data: item, message: "menu item updated successfully" });
   } catch (e) {
+    console.error('Error updating menu item:', e);
     res.status(500).json({ error: 'Failed to update menu item' });
   }
 };
@@ -61,13 +69,31 @@ const update = async (req, res) => {
 const deleteById = async (req, res) => {
   try {
     const { id = null } = req.params;
-    const item = await MenuItem.findOne({ where: { id } });
+    
+    // Convert id to integer and validate
+    const menuId = parseInt(id);
+    if (isNaN(menuId)) {
+      return res.status(400).send({ message: "Invalid menu item ID" });
+    }
+    
+    const item = await MenuItem.findOne({ where: { id: menuId } });
     if (!item) {
       return res.status(404).send({ message: "Menu item not found" });
     }
+    
     await item.destroy();
     res.status(200).send({ message: "menu item deleted successfully" });
   } catch (e) {
+    console.error('Error deleting menu item:', e);
+    
+    // Handle foreign key constraint error
+    if (e.name === 'SequelizeForeignKeyConstraintError') {
+      return res.status(409).json({ 
+        error: 'Cannot delete menu item. It is currently being used in orders.',
+        details: 'This menu item has been ordered by customers and cannot be deleted to maintain order history.'
+      });
+    }
+    
     res.status(500).json({ error: 'Failed to delete menu item' });
   }
 };
@@ -75,12 +101,20 @@ const deleteById = async (req, res) => {
 const getById = async (req, res) => {
   try {
     const { id = null } = req.params;
-    const item = await MenuItem.findOne({ where: { id } });
+    
+    // Convert id to integer and validate
+    const menuId = parseInt(id);
+    if (isNaN(menuId)) {
+      return res.status(400).send({ message: "Invalid menu item ID" });
+    }
+    
+    const item = await MenuItem.findOne({ where: { id: menuId } });
     if (!item) {
       return res.status(404).send({ message: "Menu item not found" });
     }
     res.status(200).send({ data: item, message: "menu item fetched successfully" });
   } catch (e) {
+    console.error('Error fetching menu item:', e);
     res.status(500).json({ error: 'Failed to fetch menu item' });
   }
 };
